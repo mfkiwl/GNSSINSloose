@@ -59,14 +59,14 @@ fprintf('\nNaveGo: starting simulation ... \n')
 
 % Comment any of the following parameters in order to NOT execute a particular portion of code
 
-GPS_DATA  = 'OFF';   % Simulate GPS data
-IMU1_DATA = 'OFF';   % Simulate ADIS16405 IMU data
-IMU2_DATA = 'OFF';   % Simulate ADIS16488 IMU data
+GPS_DATA  = 'ON';   % Simulate GPS data
+IMU1_DATA = 'ON';   % Simulate ADIS16405 IMU data
+IMU2_DATA = 'ON';   % Simulate ADIS16488 IMU data
 
 IMU1_INS  = 'ON';   % Execute INS/GPS integration for ADIS16405 IMU
 IMU2_INS  = 'ON';   % Execute INS/GPS integration for ADIS16488 IMU
 
-PLOT      = 'ON';   % Plot results.
+PLOT      = 'OFF';   % Plot results.
 
 % If a particular parameter is commented above, it is set by default to 'OFF'.
 

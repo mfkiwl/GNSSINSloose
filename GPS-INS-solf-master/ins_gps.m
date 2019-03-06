@@ -197,7 +197,7 @@ i = 1;
 % GPS clock is the master clock
 for j = 2:Mg
     
-    while (ti(i) <= tg(j))
+    while (ti(i) <= tg(j)&&i<3223)
         
         %% INERTIAL NAVIGATION SYSTEM (INS)
         
@@ -208,7 +208,6 @@ for j = 2:Mg
         
         % Index for INS navigation update
         i = i + 1;
-        
         % INS period
         dti = ti(i) - ti(i-1);
         
