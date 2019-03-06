@@ -52,8 +52,8 @@ imu_nav.gb_fix = imu.gb_fix .* D2R;              % deg/s -> rad/s;
 imu_nav.ab_drift = imu.ab_drift .* 0.001 .* G2MSS;  % mg -> m/s^2
 imu_nav.gb_drift = imu.gb_drift .* D2R;             % deg/s -> rad/s;
 
-% Dynamic bias PSD
-if (isinf(imu.gb_corr))
+% Dynamic bias PSD 
+if (isinf(imu.gb_corr))  %返回维数与A相同的数组 A中元素为正无穷、负无穷时，返回1，否则返回0
     imu_nav.gpsd = imu_nav.gb_drift;  % rad/s (approximation)
 else
     imu_nav.gpsd = imu_nav.gb_drift .* sqrt(imu.gb_corr);  % rad/s/root-Hz; 
