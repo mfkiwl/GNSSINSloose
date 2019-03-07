@@ -19,7 +19,7 @@ KT2MS = 0.514444;   % knot to m/s
 MS2KMH = 3.6;       % m/s to km/h
 %% LOAD REFERENCE DATA
 
-fprintf('载入参考数据：直线步行——IMU数据\n')
+fprintf('开始进行整体数据装载：\n')
 
 load LineWalk190305;
 allData=LineWalk190305;
@@ -71,7 +71,7 @@ end
 
 %% M8U PVT error profile
 
-fprintf('载入参考数据：直线步行——PVT数据\n')
+fprintf('开始进行PVT数据解读：\n')
 
 % PVT data structure:
 %         t: Mx1 time vector (seconds).
@@ -127,14 +127,16 @@ save PvtData;
 % ref dataset will be used to simulate IMU sensors.
 
 InsData.wb=[deg2rad(AngxData(:,3)),deg2rad(AngyData(:,3)),deg2rad(AngzData(:,3))];
+% InsData.wb=[AngxData(:,3),AngyData(:,3),AngzData(:,3)];
 InsData.fb=[AccxData(:,3),AccyData(:,3),AcczData(:,3)];
 %InsData.t=AngzData(,:1);
 InsData.freq=100;
 InsData.t=(0:0.1:(lengthPVT-3.8))';
 % InsData.t=InsData.t(1:3223);
 
-InsData.arw=[0.008255506,0.013632449,0.010756899];
-InsData.vrw=deg2rad([0.001434401,0.003960394,0.004316029]);
+% InsData.arw=[0.008255506,0.013632449,0.010756899];
+InsData.arw=deg2rad([0.008255506,0.013632449,0.010756899]);
+InsData.vrw=[0.001434401,0.003960394,0.004316029];
 InsData.ab_drift=[0.000536859,0.001549454,0.001255873];
 InsData.gb_drift=[0.003469329,0.003907706,0.003030818];
 InsData.ab_corr=[10,10,10];
@@ -159,7 +161,7 @@ save InsData;
 
 
 %% INS/GPS integration using 
-fprintf('开始进行组合导航测算：\n')
+fprintf('开始进行组合导航解算\n')
  % Sincronize GPS data with IMU data.
     
     % Guarantee that gps.t(1) < imu1.t(1) < gps.t(2)
@@ -206,7 +208,7 @@ save imu1_e.mat imu1_e
 
 %% PLOT
 
-fprintf('开始绘制结果图像：\n')
+fprintf('开始绘制结果图：\n')
 
 
 if (strcmp(PLOT,'ON'))
@@ -219,21 +221,21 @@ if (strcmp(PLOT,'ON'))
     plot( gps.t, gps.vel(:,1),'-c', imu1_e.t, imu1_e.vel(:,1),'-b');
     xlabel('Time [s]')
     ylabel('[m/s]')
-    legend('PVT', 'IMU1');
+    legend('PVT', 'MMEANS');
     title('NORTH VELOCITY');
     
     subplot(312)
     plot( gps.t, gps.vel(:,2),'-c', imu1_e.t, imu1_e.vel(:,2),'-b');
     xlabel('Time [s]')
     ylabel('[m/s]')
-    legend('PVT', 'IMU1');
+    legend('PVT', 'MEANS');
     title('EAST VELOCITY');
     
     subplot(313)
     plot(gps.t, gps.vel(:,3),'-c', imu1_e.t, imu1_e.vel(:,3),'-b');
     xlabel('Time [s]')
     ylabel('[m/s]')
-    legend('PVT', 'IMU1');
+    legend('PVT', 'MEANS');
     title('DOWN VELOCITY');
     
     
@@ -243,22 +245,22 @@ if (strcmp(PLOT,'ON'))
     plot( gps.t, gps.lat.*R2D, '-c', imu1_e.t, imu1_e.lat.*R2D, '-b');
     xlabel('Time [s]')
     ylabel('[deg]')
-    legend( 'PVT', 'IMU1');
-    title('LATITUDE');
+    legend( 'PVT', 'MEANS');
+    title('纬度');
     
     subplot(312)
     plot( gps.t, gps.lon.*R2D, '-c', imu1_e.t, imu1_e.lon.*R2D, '-b');
     xlabel('Time [s]')
     ylabel('[deg]')
-    legend('GPS', 'IMU1');
-    title('LONGITUDE');
+    legend('PVT', 'MEANS');
+    title('经度');
     
     subplot(313)
     plot( gps.t, gps.h, '-c', imu1_e.t, imu1_e.h, '-b');
     xlabel('Time [s]')
     ylabel('[m]')
-    legend('GPS', 'IMU1');
-    title('ALTITUDE');
+    legend('PVT', 'MEANS');
+    title('纬度');
     
     % POSITION ERRORS
     % fh = @radicurv;
@@ -274,25 +276,24 @@ if (strcmp(PLOT,'ON'))
     
     figure;
     subplot(311)
-    plot (gps.t, lat2m_g.*sig3_rr(:,7), '--k', gps.t, -lat2m_g.*sig3_rr(:,7), '--k' )
+    plot (gps.t, gps.lat-imu1_e.lat, '--k' )
     xlabel('Time [s]')
     ylabel('[m]')
-    legend( '3\sigma');
-    title('LATITUDE ERROR');
+    title('PVT与组合导航纬度差');
     
     subplot(312)
-    plot(gps.t, lon2m_g.*sig3_rr(:,8), '--k', gps.t, -lon2m_g.*sig3_rr(:,8), '--k' )
+%     plot(gps.t, lon2m_g.*sig3_rr(:,8), '--k', gps.t, -lon2m_g.*sig3_rr(:,8), '--k' )
+    plot (gps.t, gps.lon-imu1_e.lon, '--k' )
     xlabel('Time [s]')
     ylabel('[m]')
-    legend( '3\sigma');
-    title('LONGITUDE ERROR');
+    title('PVT与组合导航经度差');
     
     subplot(313)
-    plot(gps.t, sig3_rr(:,9), '--k', gps.t, -sig3_rr(:,9), '--k' )
+   plot (gps.t, gps.h-imu1_e.h, '--k' )
     xlabel('Time [s]')
     ylabel('[m]')
-    legend('3\sigma');
-    title('ALTITUDE ERROR');
+    title('PVT与组合导航高度差');
     
 end
+
 
