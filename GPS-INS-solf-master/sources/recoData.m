@@ -8,7 +8,7 @@ if (~exist('PLOT','var')),      PLOT = 'OFF'; end
 
 %% CONVERSION CONSTANTS
 
-G = 9.81;           % Gravity constant, m/s^2
+G = 9.7944;           % Gravity constant, m/s^2
 G2MSS = G;          % g to m/s^2
 MSS2G = (1/G);      % m/s^2 to g
 
@@ -135,20 +135,20 @@ InsData.t=(0:0.1:(lengthPVT-3.8))';
 % InsData.t=InsData.t(1:3223);
 
 % InsData.arw=[0.008255506,0.013632449,0.010756899];
-InsData.arw=deg2rad([0.008255506,0.013632449,0.010756899]);
-InsData.vrw=[0.001434401,0.003960394,0.004316029];
-InsData.ab_drift=[0.000536859,0.001549454,0.001255873];
-InsData.gb_drift=[0.003469329,0.003907706,0.003030818];
-InsData.ab_corr=[10,10,10];
-InsData.gb_corr=[10,10,10];
+InsData.arw          = 2   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
+InsData.vrw          = 0.3 .* ones(1,3);     % Velocity random walks [X Y Z] (m/s/root-hour)
+InsData.ab_drift    = 0.3 .* ones(1,3);     % Acc dynamic biases [X Y Z] (mg)
+InsData.gb_drift   = 0.008 .* ones(1,3);   % Gyro dynamic biases [X Y Z] (deg/s)
+InsData.ab_corr    = 100 .* ones(1,3);     % Acc correlation times [X Y Z] (seconds)
+InsData.gb_corr    = 100 .* ones(1,3);     % Gyro correlation times [X Y Z] (seconds)
 InsData.astd=[0.008212535,0.011965155,0.013044401];
 InsData.gstd=[0.024667756,0.04169835,0.033167337];
 InsData.ab_fix=[0.316398922,0.170514641,1.284741488];
 InsData.gb_fix=[0.086656974,0.055781713,0.026144786];
 InsData.apsd=[0.01962,0.01962,0.01962];
 InsData.gpsd=[0.001221730,0.001221730,0.001221730];
-InsData.ini_align=[0,0,0];
-InsData.ini_align_err=[0,0,0];
+InsData.ini_align=[10,10,10];
+InsData.ini_align_err=[10,10,10];
 
 dt = mean(diff(InsData.t));                    % IMU mean period
 imu1 = imu_err_profile(InsData, dt);      % Transform IMU manufacturer error units to SI units.
@@ -158,6 +158,27 @@ imu1.ini_align_err = [1 1 5] .* D2R;                     % Initial attitude alig
 save InsData;
 
 
+
+%% MU8 wavelet denoise
+% function [XC,CXC,LXC,PERF0,PERF2]=db5Wavelet(InData,level,WaveType,ThreType,SORH)
+% db5Wavelet(InData,level,WaveType,ThreType,SORH)
+
+% InData:输入数据
+% level：分解层数
+% wavetype：小波类型
+% thretype：阈值过滤类型
+% SHOR：‘h’/'s'
+fprintf('开始进行小波滤波处理：\n')
+
+OutFb1=db5Wavelet(imu1.fb(:,1));
+OutFb2=db5Wavelet(imu1.fb(:,2));
+OutFb3=db5Wavelet(imu1.fb(:,3));
+OutWb1=db5Wavelet(imu1.wb(:,1));
+OutWb2=db5Wavelet(imu1.wb(:,2));
+OutWb3=db5Wavelet(imu1.wb(:,3));
+
+imu1.fb=[OutFb1,OutFb2,OutFb3];
+imu1.wb=[OutWb1,OutWb2,OutWb3];
 
 
 %% INS/GPS integration using 
@@ -260,7 +281,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[m]')
     legend('PVT', 'MEANS');
-    title('纬度');
+    title('高度');
     
     % POSITION ERRORS
     % fh = @radicurv;
@@ -275,25 +296,21 @@ if (strcmp(PLOT,'ON'))
     lon2m_g = (RE + gps.h).*cos(gps.lat);
     
     figure;
-    subplot(311)
-    plot (gps.t, gps.lat-imu1_e.lat, '--k' )
-    xlabel('Time [s]')
-    ylabel('[m]')
-    title('PVT与组合导航纬度差');
-    
-    subplot(312)
-%     plot(gps.t, lon2m_g.*sig3_rr(:,8), '--k', gps.t, -lon2m_g.*sig3_rr(:,8), '--k' )
-    plot (gps.t, gps.lon-imu1_e.lon, '--k' )
-    xlabel('Time [s]')
-    ylabel('[m]')
-    title('PVT与组合导航经度差');
-    
-    subplot(313)
-   plot (gps.t, gps.h-imu1_e.h, '--k' )
-    xlabel('Time [s]')
-    ylabel('[m]')
-    title('PVT与组合导航高度差');
-    
+   plot3(gps.lon.*R2D, gps.lat.*R2D,gps.h);
+   xlabel('经度');
+   ylabel('纬度');
+   zlabel('高度');
+   title('3维轨迹图');
+   grid on;hold on;
+   hold on;
+   plot3(imu1_e.lon.*R2D, imu1_e.lat.*R2D,imu1_e.h);
+   legend('PVT','PVT/INS');
+   
+   figure;
+   plot(gps.lon.*R2D, gps.lat.*R2D);
+   hold on;grid on;
+   plot(imu1_e.lon.*R2D, imu1_e.lat.*R2D);
+   title('2维轨迹图');
 end
 
 

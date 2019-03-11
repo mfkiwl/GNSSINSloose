@@ -408,51 +408,53 @@ for j = 2:Mg
     A_d(j,:) = diag(S.A)';
     Inn(j,:) = z';
     B(j,:)   = [gb_fix', ab_fix', gb_drift', ab_drift'];
-%     idx(j) = i;
+    idx(j) = i;   %%‘≠¿¥◊¢ ÕµÙ¡À
     
 end
 
-%% Smoothing TESTING
-
+% %% Smoothing TESTING
+% 
 % % Initialize RTS Smoother
 % ps = diag(Pu_d(Mg,:));
 % xs = zeros (Mg, 21);
 % xs(Mg,:) = X(Mg,:);
 % psmooth = zeros(Mg,21);
-%
+% 
 % for j = Mg:-1:2
-%
+% 
 %     % RTS Gain
 %     pf_plus  = diag(Pu_d(j,:));
 %     pf_minus = diag(Pp_d(j,:));
 %     K_s = pf_plus * diag(A_d(j,:))' * 1/(pf_minus);
-%
+% 
 %     % Smoother State and Covariance
 %     xs(j-1,:) = X(j,:) + ( K_s * (xs(j,:) - 0)')';
 %     ps = pf_plus - K_s * (pf_minus - ps) * K_s';
-%
+% 
 %     % Store RTS Covariance
 %     psmooth(j-1,:) = diag(ps)';
 % end
-%
+% 
 %     roll_s = roll_e;
 %     pitch_s = pitch_e ;
 %     yaw_s = yaw_e  ;
-% % Attitude corrections
-%     roll_s(idx)  = roll_e(idx)  - xs(:,1);
-%     pitch_s(idx) = pitch_e(idx)  - xs(:,2);
-%     yaw_s(idx) = yaw_e(idx)    - xs(:,3);
-
-%     % Velocity corrections
-%     vel_e (idx,1) = vel_e (idx,1) + xs(:,4);
-%     vel_e (idx,2) = vel_e (idx,2) + xs(:,5);
-%     vel_e (idx,3) = vel_e (idx,3) + xs(:,6);
-%
-%     % Position corrections
-%     lat_e(idx) = lat_e(idx) + xs(:,7);
-%     lon_e(idx) = lon_e(idx) + xs(:,8);
-%     h_e(idx)   = h_e(idx)   + xs(:,9);
-%
+%     for co=2:Mg
+%           % Attitude corrections
+%         roll_s(idx(co))  = roll_e(idx(co))  - xs(co,1);
+%         pitch_s(idx(co)) = pitch_e(idx(co))  - xs(co,2);
+%         yaw_s(idx(co)) = yaw_e(idx(co))    - xs(co,3);
+% 
+%       % Velocity corrections
+%         vel_e (idx(co),1) = vel_e (idx(co),1) + xs(co,4);
+%         vel_e (idx(co),2) = vel_e (idx(co),2) + xs(co,5);
+%         vel_e (idx(co),3) = vel_e (idx(co),3) + xs(co,6);
+% 
+%       % Position corrections
+%         lat_e(idx(co)) = lat_e(idx(co)) + xs(co,7);
+%         lon_e(idx(co)) = lon_e(idx(co)) + xs(co,8);
+%         h_e(idx(co))   = h_e(idx(co))   + xs(co,9);
+%     end
+%   
 
 %% Estimates from INS/GPS integration
 

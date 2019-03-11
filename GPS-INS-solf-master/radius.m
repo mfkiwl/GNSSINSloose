@@ -1,6 +1,6 @@
 function [RM,RN] = radius(lat, precision)
 % radius: calculates meridian and normal radii of curvature.
-%
+%计算子午线和正常曲率半径。
 %   Copyright (C) 2014, Rodrigo Gonzalez, all rights reserved.
 %
 %   This file is part of NaveGo, an open-source MATLAB toolbox for
@@ -57,9 +57,11 @@ else
 end
 
 % Meridian radius of curvature: radius of curvature for north-south motion.
+%经络曲率半径：南北运动的曲率半径。
 RM = a * (1-e2) ./ (den).^(3/2);
 
 % Normal radius of curvature: radius of curvature for east-west motion. 
+%正常曲率半径：东西向运动的曲率半径。
 % AKA transverse radius.
 RN = a ./ sqrt(den);
 
