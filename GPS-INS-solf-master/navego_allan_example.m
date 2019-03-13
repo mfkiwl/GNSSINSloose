@@ -44,11 +44,11 @@ versionstr = 'NaveGo, release v0.8.0-alpha';
 fprintf('\n%s.\n', versionstr)
 fprintf('\nNaveGo: starting Allan variance analysis ... \n')
 
-load Imu022402
+load 030401_db5_IMU
 
 %% ALLAN VARIANCE FOR STIM300 IMU
 
-[stim300] = allan_imu (ImuData);
+[stim300] = allan_imu (WaveIMU);
 
 stim300_arw = stim300.arw
 stim300_vrw = stim300.vrw
