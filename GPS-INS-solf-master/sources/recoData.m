@@ -1,5 +1,5 @@
 clc,clear
-
+close all;
 %% CODE EXECUTION PARAMETERS
 
 PLOT      = 'ON';   % Plot results.
@@ -21,8 +21,8 @@ MS2KMH = 3.6;       % m/s to km/h
 
 fprintf('开始进行整体数据装载：\n')
 
-load LineWalk190305;
-allData=LineWalk190305;
+load 0321LanXiang;
+allData=LanXiang0321;
 lengthData=length(allData);
 cE=1;
 cP=1;
@@ -178,6 +178,7 @@ OutWb2=db5Wavelet(imu1.wb(:,2));
 OutWb3=db5Wavelet(imu1.wb(:,3));
 
 imu1.fb=[OutFb1,OutFb2,OutFb3];
+imu1.fb=imu1.fb(1:2759,:);
 imu1.wb=[OutWb1,OutWb2,OutWb3];
 
 
@@ -243,6 +244,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[m/s]')
     legend('PVT', 'MMEANS');
+    set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('NORTH VELOCITY');
     
     subplot(312)
@@ -250,6 +252,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[m/s]')
     legend('PVT', 'MEANS');
+    set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('EAST VELOCITY');
     
     subplot(313)
@@ -257,6 +260,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[m/s]')
     legend('PVT', 'MEANS');
+    set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('DOWN VELOCITY');
     
     
@@ -267,6 +271,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[deg]')
     legend( 'PVT', 'MEANS');
+    set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('纬度');
     
     subplot(312)
@@ -274,6 +279,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[deg]')
     legend('PVT', 'MEANS');
+    set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('经度');
     
     subplot(313)
@@ -281,6 +287,7 @@ if (strcmp(PLOT,'ON'))
     xlabel('Time [s]')
     ylabel('[m]')
     legend('PVT', 'MEANS');
+    set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('高度');
     
     % POSITION ERRORS
@@ -301,6 +308,7 @@ if (strcmp(PLOT,'ON'))
    ylabel('纬度');
    zlabel('高度');
    title('3维轨迹图');
+   set(gca, 'Fontname', '华文中宋','FontSize',14);
    grid on;hold on;
    hold on;
    plot3(imu1_e.lon.*R2D, imu1_e.lat.*R2D,imu1_e.h);
@@ -310,7 +318,27 @@ if (strcmp(PLOT,'ON'))
    plot(gps.lon.*R2D, gps.lat.*R2D);
    hold on;grid on;
    plot(imu1_e.lon.*R2D, imu1_e.lat.*R2D);
+   set(gca, 'Fontname', '华文中宋','FontSize',14);
+   legend('PVT','PVT/INS');
    title('2维轨迹图');
 end
 
+ figure;
+m_proj('miller','lat',[-77 77]);   
+m_coast('patch',[.7 1 .7],'edgecolor','none'); 
+% patch(ax,'xdata',X(:),'ydata',Y(:),'zdata',-MAP_PROJECTION.LARGVAL*ones(size(X(:))),'facecolor',gbackcolor,...
 
+m_grid('box','fancy','linestyle','-','gridcolor','w','backcolor',[.2 .65 1]);
+    
+cities={'Cairo','Washington','Buenos Aires'}; 
+lons=[ 30+2/60  -77-2/60   -58-22/60];
+lats=[ 31+21/60  38+53/60  -34-45/60]; 
+for k=1:3
+    [range,ln,lt]=m_lldist([-123-6/60 lons(k)],[49+13/60  lats(k)],40); 
+    m_line(ln,lt,'color','r','linewi',2); 
+    m_text(ln(end),lt(end),sprintf('%s - %d km',cities{k},round(range)));
+end;
+title('Great Circle Routes','fontsize',14,'fontweight','bold');
+    
+set(gcf,'color','w');   % Need to do this otherwise 'print' turns the lakes black
+    
