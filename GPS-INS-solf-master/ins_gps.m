@@ -295,11 +295,21 @@ for j = 2:Mg
         ab_fix   = xu(13:15);
         gb_drift = xu(16:18);
         ab_drift = xu(19:21);
+        
+       
    
     end
     
     %% INNOVATIONS
-    
+     if gps.lat(j)==0
+            gps.lat(j)=lat_e(i);
+        end
+         if gps.lon(j)==0
+            gps.lon(j)=lon_e(i);
+         end
+        if gps.h(j)==0
+            gps.h(j)=h_e(i);
+        end
     [RM,RN] = radius(lat_e(i), precision);
     Tpr = diag([(RM + h_e(i)), (RN + h_e(i)) * cos(lat_e(i)), -1]);  % radians-to-meters
     

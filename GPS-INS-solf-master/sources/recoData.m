@@ -21,8 +21,8 @@ MS2KMH = 3.6;       % m/s to km/h
 
 fprintf('开始进行整体数据装载：\n')
 
-load 0321LanXiang;
-allData=LanXiang0321;
+load GaosuSuidao0321;
+allData=GaosuSuidao0321;
 lengthData=length(allData);
 cE=1;
 cP=1;
@@ -100,8 +100,9 @@ PvtData.freq=10;
 gps=PvtData;
 save PvtData;
 
-
-
+PvtData.lon(50:100)=0;
+PvtData.lat(50:100)=0;
+PvtData.h(50:100)=0;
 %% M8U IMU error profile
 
 % IMU data structure:
@@ -134,7 +135,7 @@ InsData.freq=100;
 InsData.t=(0:0.1:(lengthPVT-3.8))';
 % InsData.t=InsData.t(1:3223);
 
-% InsData.arw=[0.008255506,0.013632449,0.010756899];
+InsData.arw=[0.008255506,0.013632449,0.010756899];
 InsData.arw          = 2   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
 InsData.vrw          = 0.3 .* ones(1,3);     % Velocity random walks [X Y Z] (m/s/root-hour)
 InsData.ab_drift    = 0.3 .* ones(1,3);     % Acc dynamic biases [X Y Z] (mg)
@@ -150,6 +151,21 @@ InsData.gpsd=[0.001221730,0.001221730,0.001221730];
 InsData.ini_align=[10,10,10];
 InsData.ini_align_err=[10,10,10];
 
+%数据试验区
+% InsData.arw          = 2   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
+% InsData.vrw          = 0.3 .* ones(1,3);     % Velocity random walks [X Y Z] (m/s/root-hour)
+% InsData.ab_drift    = 0.3 .* ones(1,3);     % Acc dynamic biases [X Y Z] (mg)
+% InsData.gb_drift   = 0.008 .* ones(1,3);   % Gyro dynamic biases [X Y Z] (deg/s)
+% InsData.ab_corr    = 100 .* ones(1,3);     % Acc correlation times [X Y Z] (seconds)
+% InsData.gb_corr    = 100 .* ones(1,3);     % Gyro correlation times [X Y Z] (seconds)
+% InsData.astd=0.005.*ones(1,3);%[0.008212535,0.011965155,0.013044401];
+% InsData.gstd=0.005.*ones(1,3);%[0.024667756,0.04169835,0.033167337];
+% InsData.ab_fix=0.05.*ones(1,3);%[0.316398922,0.170514641,1.284741488];
+% InsData.gb_fix=0.05.*ones(1,3);%[0.086656974,0.055781713,0.026144786];
+% InsData.apsd=0.01.*ones(1,3);%[0.01962,0.01962,0.01962];
+% InsData.gpsd=0.01.*ones(1,3);%[0.001221730,0.001221730,0.001221730];
+% InsData.ini_align=[10,10,10];
+% InsData.ini_align_err=[10,10,10];
 dt = mean(diff(InsData.t));                    % IMU mean period
 imu1 = imu_err_profile(InsData, dt);      % Transform IMU manufacturer error units to SI units.
 
@@ -320,25 +336,32 @@ if (strcmp(PLOT,'ON'))
    plot(imu1_e.lon.*R2D, imu1_e.lat.*R2D);
    set(gca, 'Fontname', '华文中宋','FontSize',14);
    legend('PVT','PVT/INS');
-   title('2维轨迹图');
+   title('2维轨迹对比图');
+   
+   figure;
+   plot(imu1_e.lon.*R2D, imu1_e.lat.*R2D);
+   set(gca, 'Fontname', '华文中宋','FontSize',14);grid on;
+   title('组合导航平面轨迹结果');
 end
 
- figure;
-m_proj('miller','lat',[-77 77]);   
-m_coast('patch',[.7 1 .7],'edgecolor','none'); 
-% patch(ax,'xdata',X(:),'ydata',Y(:),'zdata',-MAP_PROJECTION.LARGVAL*ones(size(X(:))),'facecolor',gbackcolor,...
 
-m_grid('box','fancy','linestyle','-','gridcolor','w','backcolor',[.2 .65 1]);
-    
-cities={'Cairo','Washington','Buenos Aires'}; 
-lons=[ 30+2/60  -77-2/60   -58-22/60];
-lats=[ 31+21/60  38+53/60  -34-45/60]; 
-for k=1:3
-    [range,ln,lt]=m_lldist([-123-6/60 lons(k)],[49+13/60  lats(k)],40); 
-    m_line(ln,lt,'color','r','linewi',2); 
-    m_text(ln(end),lt(end),sprintf('%s - %d km',cities{k},round(range)));
-end;
-title('Great Circle Routes','fontsize',14,'fontweight','bold');
-    
-set(gcf,'color','w');   % Need to do this otherwise 'print' turns the lakes black
-    
+%% Plot map
+%  figure;
+% m_proj('miller','lat',[-77 77]);   
+% m_coast('patch',[.7 1 .7],'edgecolor','none'); 
+% % patch(ax,'xdata',X(:),'ydata',Y(:),'zdata',-MAP_PROJECTION.LARGVAL*ones(size(X(:))),'facecolor',gbackcolor,...
+% 
+% m_grid('box','fancy','linestyle','-','gridcolor','w','backcolor',[.2 .65 1]);
+%     
+% cities={'Cairo','Washington','Buenos Aires'}; 
+% lons=[ 30+2/60  -77-2/60   -58-22/60];
+% lats=[ 31+21/60  38+53/60  -34-45/60]; 
+% for k=1:3
+%     [range,ln,lt]=m_lldist([-123-6/60 lons(k)],[49+13/60  lats(k)],40); 
+%     m_line(ln,lt,'color','r','linewi',2); 
+%     m_text(ln(end),lt(end),sprintf('%s - %d km',cities{k},round(range)));
+% end;
+% title('Great Circle Routes','fontsize',14,'fontweight','bold');
+%     
+% set(gcf,'color','w');   % Need to do this otherwise 'print' turns the lakes black
+%     

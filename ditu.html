@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<meta name="keywords" content="ç™æƒ§å®³åœæ¿›¾,ç™æƒ§å®³åœæ¿›¾APIé”›Œç™æƒ§å®³åœæ¿›æ‡ô’®šæ¶”‰å®¸ãƒ¥…å‡¤¼Œç™æƒ§å®³åœæ¿›ç‚¬‰€ç‘™åè™«‰€å¯°—å®¸ãƒ¥…·" />
+<meta name="description" content="ç™æƒ§å®³åœæ¿›¾APIè‡ô’®šæ¶”‰åœæ¿›æ’…¼Œç”¯ô”ŠŠâ•ƒ”ã„¦ˆå³°œã„¥ô•«§†åŒ–æ“æµ£œæ¶“‹ç”Ÿæˆç™æƒ§å®³åœæ¿›¾" />
+<title>ç™æƒ§å®³åœæ¿›¾APIè‡ô’®šæ¶”‰åœæ¿›¾</title>
+<!--å¯®•ç”ã„§™æƒ§å®³åœæ¿›¾API-->
+<style type="text/css">
+    html,body{margin:0;padding:0;}
+    .iw_poi_title {color:#CC5522;font-size:14px;font-weight:bold;overflow:hidden;padding-right:13px;white-space:nowrap}
+    .iw_poi_content {font:12px arial,sans-serif;overflow:visible;padding-top:4px;white-space:-moz-pre-wrap;word-wrap:break-word}
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?key=&v=1.1&services=true"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=wamGemEDAUWZyKNLhPKTiRadUCCX59G7"></script>
+<script type="text/javascript" src="data.js"></script>
+</head>
+
+<body>
+  <!--ç™æƒ§å®³åœæ¿›æƒ§ô“å™¨-->
+  <div style="width:697px;height:550px;border:#ccc solid 1px;" id="dituContent"></div>
+</body>
+<script type="text/javascript">
+ //åˆ›å¯¤å“„’Œåˆæ¿®‹åŒ–åœæ¿›æƒ§‡èŠ¥•å¸®¼š
+ function initMap(){
+     createMap();//åˆ›å¯¤å“„œæ¿›¾
+     setMapEvent();//ç’å‰§ç–†åœæ¿›å¥º‹æµ ¶
+     addMapControl();//å‘åœæ¿›ç‚¬åŠåŠ æÑ‚æ¬¢
+     addMarker();//å‘åœæ¿›å¥è…‘å¨£è¯²Š marker
+     addPolyline();//å‘åœæ¿›å¥è…‘å¨£è¯²Š ç»¾¿
+ }
+ 
+ //åˆ›å¯¤å“„œæ¿›æƒ§‡èŠ¥•å¸®¼š
+ function createMap(){
+     var map = new BMap.Map("dituContent");//åœã„§™æƒ§å®³åœæ¿›æƒ§ô“å™ã„¤è…‘åˆ›å¯¤è½°¸€æ¶“ô’œæ¿›¾
+     var point = new BMap.Point(109.44966,34.184332);//ç€¹šæ¶”‰æ¶“€æ¶“ô‘è…‘è¹‡ƒç‚ç‘°æ ‡
+     map.centerAndZoom(point,14);//ç’æƒ§®šåœæ¿›å‰§š„æ¶“ô’¬¿ƒç‚ç‘°’Œåæ ‡éªè·º°†åœæ¿›ç‚¬˜å‰§ãšåœã„¥œæ¿›æƒ§ô“å™ã„¤è…‘
+     window.map = map;//ç†mapå˜é‡ç€›˜å‚ã„¥œã„¥…ã„¥±€
+ }
+ 
+ //åœæ¿›å¥º‹æµ æƒ°ô“£ç¼ƒô”Š‡èŠ¥•å¸®¼š
+ function setMapEvent(){
+     map.enableDragging();//åô•ª”ã„¥œæ¿›ç‚¬‹–æ‹æˆ’º‹æµ è®¹¼Œæ¦›˜ç’ã‚…ô•ª”¨(åô•§¸å†™)
+     map.enableScrollWheelZoom();//åô•ª”ã„¥œæ¿›ç‚¬»šæô”‹”æƒ§ã‡ç¼‚â•°
+     map.enableDoubleClickZoom();//åô•ª”ã„©¼ æ ‡åŒå‡ç»˜”æƒ§ã‡é”›Œæ¦›˜ç’ã‚…ô•ª”¨(åô•§¸å†™)
+     map.enableKeyboard();//åô•ª”ã„©”ô”Œ›˜æ¶“Šæ¶“‹å®¸ôˆšæŠ½”ô”ŒĞ©åŠã„¥œæ¿›¾
+ }
+ 
+ //åœæ¿›ç‚¬Ñ‚æ¬¢å¨£è¯²Š å‡èŠ¥•å¸®¼š
+ function addMapControl(){
+     //å‘åœæ¿›å¥è…‘å¨£è¯²Š ç¼‚â•‚”ç‚¬Ñ‚æ¬¢
+	 var ctrl_nav = new BMap.NavigationControl({anchor:BMAP_ANCHOR_TOP_LEFT,type:BMAP_NAVIGATION_CONTROL_LARGE});
+	 map.addControl(ctrl_nav);
+     //å‘åœæ¿›å¥è…‘å¨£è¯²Š ç¼‚â•ƒ•ãƒ¥›ç‚¬Ñ‚æ¬¢
+	 var ctrl_ove = new BMap.OverviewMapControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT,isOpen:1});
+	 map.addControl(ctrl_ove);
+     //å‘åœæ¿›å¥è…‘å¨£è¯²Š å§£”æ¸š‹ççƒ˜Ñ‚æ¬¢
+	 var ctrl_sca = new BMap.ScaleControl({anchor:BMAP_ANCHOR_BOTTOM_LEFT});
+	 map.addControl(ctrl_sca);
+ }
+ 
+ //æ ‡å¨‰ã„§‚è§„•æ‰®»„
+ var markerArr = [{title:"æˆ‘çš„æ ‡ç’°",content:"æˆ‘çš„æ¾¶‡å¨‰¨",point:"109.488826|34.203009",isOpen:0,icon:{w:21,h:21,l:0,t:0,x:6,lb:5}}
+ ];
+ //åˆ›å¯¤ºmarker
+ function addMarker(){
+     for(var i=0;i<markerArr.length;i++){
+         var json = markerArr[i];
+         var p0 = json.point.split("|")[0];
+         var p1 = json.point.split("|")[1];
+         var point = new BMap.Point(p0,p1);
+		 var iconImg = createIcon(json.icon);
+         var marker = new BMap.Marker(point,{icon:iconImg});
+		 var iw = createInfoWindow(i);
+		 var label = new BMap.Label(json.title,{"offset":new BMap.Size(json.icon.lb-json.icon.x+10,-20)});
+		 marker.setLabel(label);
+         map.addOverlay(marker);
+         label.setStyle({
+             borderColor:"#808080",
+             color:"#333",
+             cursor:"pointer"
+         });
+		 
+		 (function(){
+			 var index = i;
+			 var _iw = createInfoWindow(i);
+			 var _marker = marker;
+			 _marker.addEventListener("click",function(){
+				 this.openInfoWindow(_iw);
+			 });
+			 _iw.addEventListener("open",function(){
+				 _marker.getLabel().hide();
+			 })
+			 _iw.addEventListener("close",function(){
+				 _marker.getLabel().show();
+			 })
+			 label.addEventListener("click",function(){
+				 _marker.openInfoWindow(_iw);
+			 })
+			 if(!!json.isOpen){
+				 label.hide();
+				 _marker.openInfoWindow(_iw);
+			 }
+		 })()
+     }
+ }
+ //åˆ›å¯¤ºInfoWindow
+ function createInfoWindow(i){
+     var json = markerArr[i];
+     var iw = new BMap.InfoWindow("<b class='iw_poi_title' title='" + json.title + "'>" + json.title + "</b><div class='iw_poi_content'>"+json.content+"</div>");
+     return iw;
+ }
+ //åˆ›å¯¤è½°¸€æ¶“ªIcon
+ function createIcon(json){
+     var icon = new BMap.Icon("http://app.baidu.com/map/images/us_mk_icon.png", new BMap.Size(json.w,json.h),{imageOffset: new BMap.Size(-json.l,-json.t),infoWindowOffset:new BMap.Size(json.lb+5,1),offset:new BMap.Size(json.x,json.h)})
+     return icon;
+ }
+ //æ ‡å¨‰ã„§åšæ•æ‰®»„
+ var plPoints = data;
+
+ //å‘åœæ¿›å¥è…‘å¨£è¯²Š ç»¾å®‡èŠ¥•°
+ function addPolyline(){
+	 for(var i=0;i<plPoints.length;i++){
+		 var json = plPoints[i];
+		 points = [];
+         var before_trans = [];
+		 for(var j=0;j<json.points.length;j++){
+			 var p1 = json.points[j].split("|")[0];
+			 var p2 = json.points[j].split("|")[1];
+             before_trans.push(new BMap.Point(p1,p2));
+             if ((j+1)%10 == 0 || j == json.points.length-1) {
+                 var translateCallback = function (data){
+                     if(data.status === 0) {
+                         points.push(data.points[0]);
+                     }
+                 }
+                 var convertor = new BMap.Convertor();
+                 convertor.translate(before_trans, 1, 5, translateCallback);
+                 before_trans = [];
+             }
+		 }
+         setTimeout(function(){
+             var point_sea = new BMap.PointCollection(points, {color:json.color, size:json.size});
+             map.addOverlay(point_sea);
+             alert(map.getOverlays().length);
+         }, 5000);
+     }
+ }
+ 
+ initMap();//åˆ›å¯¤å“„’Œåˆæ¿®‹åŒ–åœæ¿›¾
+</script>
+</html>
