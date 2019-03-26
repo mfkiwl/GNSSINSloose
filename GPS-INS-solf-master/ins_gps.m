@@ -86,7 +86,7 @@ function [ins_gps_e] = ins_gps(imu, gps, att_mode, precision)
 % Date:    2016/11/15
 % Author:  Rodrigo Gonzalez <rodralez@frm.utn.edu.ar>
 % URL:     https://github.com/rodralez/navego
-
+R2D = (180/pi);     % radians to degrees
 if nargin < 4, att_mode  = 'quaternion'; end
 if nargin < 5, precision = 'double'; end
 
@@ -129,7 +129,7 @@ if strcmp(precision, 'single')  % single precision
     yaw_e(1)   = single(imu.ini_align(3));
     vel_e(1,:) = single(gps.vel(1,:));
     h_e(1)     = single(gps.h(1));
-    
+     V_e  =  (zeros(Mi,1));
 else % double precision
     
     % Preallocate memory for estimates
@@ -138,6 +138,7 @@ else % double precision
     yaw_e   = (zeros (Mi, 1));
     vel_e   = (zeros (Mi, 3));
     h_e     = (zeros (Mi, 1));
+    V_e  =  (zeros(Mi,1));
     x       = ( [ zeros(1,9), imu.gb_fix, imu.ab_fix, imu.gb_drift, imu.ab_drift ] )';      % Kalman filter error vector state
     
     % Constant matrices
@@ -196,16 +197,16 @@ i = 1;
 
 % GPS clock is the master clock
 for j = 2:Mg
-    
-    while (ti(i) <= tg(j)&&i<2759)
+
+        while (ti(i) <= tg(j)&&i<2759)
         
         %% INERTIAL NAVIGATION SYSTEM (INS)
-        
         % Print a dot on console every 10,000 INS executions
         if (mod(i,10000) == 0), fprintf('. ');  end
         % Print a return on console every 200,000 INS executions
         if (mod(i,200000) == 0), fprintf('\n'); end
         
+
         % Index for INS navigation update
         i = i + 1;
         % INS period
@@ -295,49 +296,69 @@ for j = 2:Mg
         ab_fix   = xu(13:15);
         gb_drift = xu(16:18);
         ab_drift = xu(19:21);
-        
+        V_e(i)=distance(lon_e(i)*R2D,lat_e(i)*R2D,lon_e(i-1)*R2D,lat_e(i-1)*R2D)/0.1;
        
    
     end
     
     %% INNOVATIONS
-     if gps.lat(j)==0
-            gps.lat(j)=lat_e(i);
-        end
-         if gps.lon(j)==0
-            gps.lon(j)=lon_e(i);
-         end
-        if gps.h(j)==0
-            gps.h(j)=h_e(i);
-        end
     [RM,RN] = radius(lat_e(i), precision);
     Tpr = diag([(RM + h_e(i)), (RN + h_e(i)) * cos(lat_e(i)), -1]);  % radians-to-meters
+    if gps.lon(j)~=0 
+        % Innovations
+        zp = Tpr * ([lat_e(i); lon_e(i); h_e(i);] - [gps.lat(j); gps.lon(j); gps.h(j);]) ...
+         - (DCMbn_n * gps.larm);
     
-    % Innovations
-    zp = Tpr * ([lat_e(i); lon_e(i); h_e(i);] - [gps.lat(j); gps.lon(j); gps.h(j);]) ...
-        - (DCMbn_n * gps.larm);
+        zv = (vel_e(i,:) - gps.vel(j,:))';
     
-    zv = (vel_e(i,:) - gps.vel(j,:))';
+         z = [ zv' zp' ]';
     
-    z = [ zv' zp' ]';
+        %% KALMAN FILTER
     
-    %% KALMAN FILTER
+        % GPS period
+         dtg = tg(j) - tg(j-1);
     
-    % GPS period
-    dtg = tg(j) - tg(j-1);
-    
-%     if (gps.nsat(j) > 1)
+    %     if (gps.nsat(j) > 1)
         
-        % Vector to update matrix F
-        upd = [vel_e(i,:) lat_e(i) h_e(i) fn'];
+            % Vector to update matrix F
+          upd = [vel_e(i,:) lat_e(i) h_e(i) fn'];
         
-        % Update matrices F and G
-        [S.F, S.G] = F_update(upd, DCMbn_n, imu);
+            % Update matrices F and G
+            [S.F, S.G] = F_update(upd, DCMbn_n, imu);
         
-        %     Trp = diag([ 1/(RM + h_e(i)), 1/((RN + h_e(i)) * cos(lat_e(i))), -1]);  % meters-to-radians
+            %     Trp = diag([ 1/(RM + h_e(i)), 1/((RN + h_e(i)) * cos(lat_e(i))), -1]);  % meters-to-radians
         
-        S.R = diag([gps.stdv, gps.stdm].^2);
+            S.R = diag([gps.stdv, gps.stdm].^2);
+    
+    
+%如果卫星没信号
+elseif gps.lon(j)==0 
+             % Innovations
+%         zp = Tpr * ([lat_e(i); lon_e(i); h_e(i);] - [lat_e(i-1); lon_e(i-1); h_e(i-1);]) ...
+%          - (DCMbn_n * gps.larm);
+%     
+%         zv =0.3*ones(3,1);% (vel_e(i,:) - gps.vel(j,:))';
+%     
+%          z = [ zv' zv' ]';
+    
+        %% KALMAN FILTER
+    
+        % GPS period
+         dtg = tg(j) - tg(j-1);
+    
+    %     if (gps.nsat(j) > 1)
         
+            % Vector to update matrix F
+          upd = [vel_e(i,:) lat_e(i) h_e(i) fn'];
+        
+            % Update matrices F and G
+            [S.F, S.G] = F_update(upd, DCMbn_n, imu);
+        
+            %     Trp = diag([ 1/(RM + h_e(i)), 1/((RN + h_e(i)) * cos(lat_e(i))), -1]);  % meters-to-radians
+        
+%             S.R = diag([gps.stdv, gps.stdm].^2);
+     
+    end
         % Update matrix H
         S.H = [ Z I Z   Z Z Z Z;
             Z Z Tpr Z Z Z Z; ];
@@ -443,6 +464,7 @@ end
 % 
 %     % Store RTS Covariance
 %     psmooth(j-1,:) = diag(ps)';
+%     
 % end
 % 
 %     roll_s = roll_e;
@@ -464,7 +486,7 @@ end
 %         lon_e(idx(co)) = lon_e(idx(co)) + xs(co,8);
 %         h_e(idx(co))   = h_e(idx(co))   + xs(co,9);
 %     end
-%   
+  
 
 %% Estimates from INS/GPS integration
 
@@ -480,7 +502,6 @@ ins_gps_e.P_d   = Pp_d;             % P matrix diagonals
 ins_gps_e.B     = B;                % Kalman filter biases compensations
 ins_gps_e.Inn   = Inn;              % Kalman filter innovations
 ins_gps_e.X     = X;                % Kalman filter states evolution
-
+ins_gps_e.V = V_e;         %driving v
 fprintf('\n');
-
 end

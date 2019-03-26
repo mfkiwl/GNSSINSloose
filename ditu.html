@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
-<meta name="keywords" content="�惧害�板��,�惧害�板��API锛��惧害�板�捐�������涔�宸ュ�凤���惧害�板�炬��瑙��虫��寰�宸ュ��" />
-<meta name="description" content="�惧害�板��API�������涔��板�撅��甯�����╃�ㄦ�峰�ㄥ�������化操浣�涓�生成�惧害�板��" />
-<title>�惧害�板��API�������涔��板��</title>
-<!--寮��ㄧ�惧害�板��API-->
+<meta name="keywords" content="ç™æƒ§å®³åœæ¿›¾,ç™æƒ§å®³åœæ¿›¾APIé”›Œç™æƒ§å®³åœæ¿›æ‡ôŽ’®šæ¶”‰å®¸ãƒ¥…å‡¤¼Œç™æƒ§å®³åœæ¿›ç‚¬‰€ç‘™åè™«‰€å¯°—å®¸ãƒ¥…·" />
+<meta name="description" content="ç™æƒ§å®³åœæ¿›¾APIè‡ôŽ’®šæ¶”‰åœæ¿›æ’…¼Œç”¯ô”ŠŠâ•ƒ”ã„¦ˆå³°œã„¥ô•«§†åŒ–æ“æµ£œæ¶“‹ç”Ÿæˆç™æƒ§å®³åœæ¿›¾" />
+<title>map</title>
+<!--å¯®•ç”ã„§™æƒ§å®³åœæ¿›¾API-->
 <style type="text/css">
     html,body{margin:0;padding:0;}
     .iw_poi_title {color:#CC5522;font-size:14px;font-weight:bold;overflow:hidden;padding-right:13px;white-space:nowrap}
@@ -17,52 +17,52 @@
 </head>
 
 <body>
-  <!--�惧害�板�惧����器-->
+  <!--ç™æƒ§å®³åœæ¿›æƒ§ô“žå™¨-->
   <div style="width:697px;height:550px;border:#ccc solid 1px;" id="dituContent"></div>
 </body>
 <script type="text/javascript">
- //创寤哄��初濮�化�板�惧�芥�帮��
+ //åˆ›å¯¤å“„’Œåˆæ¿®‹åŒ–åœæ¿›æƒ§‡èŠ¥•å¸®¼š
  function initMap(){
-     createMap();//创寤哄�板��
-     setMapEvent();//璁剧疆�板�句��浠�
-     addMapControl();//向�板�炬坊加�т欢
-     addMarker();//向�板�句腑娣诲��marker
-     addPolyline();//向�板�句腑娣诲��绾�
+     createMap();//åˆ›å¯¤å“„œæ¿›¾
+     setMapEvent();//ç’å‰§ç–†åœæ¿›å¥º‹æµ ¶
+     addMapControl();//å‘åœæ¿›ç‚¬åŠåŠ æŽÑ‚æ¬¢
+     addMarker();//å‘åœæ¿›å¥è…‘å¨£è¯²Š marker
+     addPolyline();//å‘åœæ¿›å¥è…‘å¨£è¯²Š ç»¾¿
  }
  
- //创寤哄�板�惧�芥�帮��
+ //åˆ›å¯¤å“„œæ¿›æƒ§‡èŠ¥•å¸®¼š
  function createMap(){
-     var map = new BMap.Map("dituContent");//�ㄧ�惧害�板�惧�����ㄤ腑创寤轰��涓�����板��
-     var point = new BMap.Point(109.44966,34.184332);//瀹�涔�涓�涓����腑蹇��瑰��标
-     map.centerAndZoom(point,14);//璁惧���板�剧��涓�������瑰��坐标骞跺���板�炬�剧ず�ㄥ�板�惧�����ㄤ腑
-     window.map = map;//灏�map变量瀛��ㄥ�ㄥ�ㄥ��
+     var map = new BMap.Map("dituContent");//åœã„§™æƒ§å®³åœæ¿›æƒ§ô“žå™ã„¤è…‘åˆ›å¯¤è½°¸€æ¶“ôŽ’œæ¿›¾
+     var point = new BMap.Point(109.44966,34.184332);//ç€¹šæ¶”‰æ¶“€æ¶“ôŽ‘è…‘è¹‡ƒç‚ç‘°æ ‡
+     map.centerAndZoom(point,14);//ç’æƒ§®šåœæ¿›å‰§š„æ¶“ô’¬¿ƒç‚ç‘°’Œåæ ‡éªžè·º°†åœæ¿›ç‚¬˜å‰§ãšåœã„¥œæ¿›æƒ§ô“žå™ã„¤è…‘
+     window.map = map;//ç†mapå˜é‡ç€›˜å‚ã„¥œã„¥…ã„¥±€
  }
  
- //�板�句��浠惰����缃�����芥�帮��
+ //åœæ¿›å¥º‹æµ æƒ°ô“£ç¼ƒô”Š‡èŠ¥•å¸®¼š
  function setMapEvent(){
-     map.enableDragging();//������ㄥ�板�炬���戒��浠讹��榛�璁ゅ�������(�������写)
-     map.enableScrollWheelZoom();//������ㄥ�板�炬��杞�����惧ぇ缂╁��
-     map.enableDoubleClickZoom();//������ㄩ��标双�绘�惧ぇ锛�榛�璁ゅ�������(�������写)
-     map.enableKeyboard();//������ㄩ�������涓�涓�宸�����抽�����Щ�ㄥ�板��
+     map.enableDragging();//åô•ª”ã„¥œæ¿›ç‚¬‹–æ‹æˆ’º‹æµ è®¹¼Œæ¦›˜ç’ã‚…ô•ª”¨(åô•§¸å†™)
+     map.enableScrollWheelZoom();//åô•ª”ã„¥œæ¿›ç‚¬»šæžô”‹”æƒ§ã‡ç¼‚â•°
+     map.enableDoubleClickZoom();//åô•ª”ã„©¼ æ ‡åŒå‡ç»˜”æƒ§ã‡é”›Œæ¦›˜ç’ã‚…ô•ª”¨(åô•§¸å†™)
+     map.enableKeyboard();//åô•ª”ã„©”ô”Œ›˜æ¶“Šæ¶“‹å®¸ôˆšæŠ½”ô”ŒÐ©åŠã„¥œæ¿›¾
  }
  
- //�板�炬�т欢娣诲���芥�帮��
+ //åœæ¿›ç‚¬ŽÑ‚æ¬¢å¨£è¯²Š å‡èŠ¥•å¸®¼š
  function addMapControl(){
-     //向�板�句腑娣诲��缂╂�炬�т欢
+     //å‘åœæ¿›å¥è…‘å¨£è¯²Š ç¼‚â•‚”ç‚¬ŽÑ‚æ¬¢
 	 var ctrl_nav = new BMap.NavigationControl({anchor:BMAP_ANCHOR_TOP_LEFT,type:BMAP_NAVIGATION_CONTROL_LARGE});
 	 map.addControl(ctrl_nav);
-     //向�板�句腑娣诲��缂╃�ュ�炬�т欢
+     //å‘åœæ¿›å¥è…‘å¨£è¯²Š ç¼‚â•ƒ•ãƒ¥›ç‚¬ŽÑ‚æ¬¢
 	 var ctrl_ove = new BMap.OverviewMapControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT,isOpen:1});
 	 map.addControl(ctrl_ove);
-     //向�板�句腑娣诲��姣�渚�灏烘�т欢
+     //å‘åœæ¿›å¥è…‘å¨£è¯²Š å§£”æ¸š‹ççƒ˜ŽÑ‚æ¬¢
 	 var ctrl_sca = new BMap.ScaleControl({anchor:BMAP_ANCHOR_BOTTOM_LEFT});
 	 map.addControl(ctrl_sca);
  }
  
- //标娉ㄧ�规�扮��
- var markerArr = [{title:"我的标璁�",content:"我的澶�娉�",point:"109.488826|34.203009",isOpen:0,icon:{w:21,h:21,l:0,t:0,x:6,lb:5}}
+ //æ ‡å¨‰ã„§‚è§„•æ‰®»„
+ var markerArr = [{title:"start",content:"start",point:"109.488826|34.203009",isOpen:0,icon:{w:21,h:21,l:0,t:0,x:6,lb:5}}
  ];
- //创寤�marker
+ //åˆ›å¯¤ºmarker
  function addMarker(){
      for(var i=0;i<markerArr.length;i++){
          var json = markerArr[i];
@@ -104,49 +104,61 @@
 		 })()
      }
  }
- //创寤�InfoWindow
+ //åˆ›å¯¤ºInfoWindow
  function createInfoWindow(i){
      var json = markerArr[i];
      var iw = new BMap.InfoWindow("<b class='iw_poi_title' title='" + json.title + "'>" + json.title + "</b><div class='iw_poi_content'>"+json.content+"</div>");
      return iw;
  }
- //创寤轰��涓�Icon
+ //åˆ›å¯¤è½°¸€æ¶“ªIcon
  function createIcon(json){
      var icon = new BMap.Icon("http://app.baidu.com/map/images/us_mk_icon.png", new BMap.Size(json.w,json.h),{imageOffset: new BMap.Size(-json.l,-json.t),infoWindowOffset:new BMap.Size(json.lb+5,1),offset:new BMap.Size(json.x,json.h)})
      return icon;
  }
- //标娉ㄧ嚎�扮��
+ //æ ‡å¨‰ã„§åšŽæ•æ‰®»„
  var plPoints = data;
 
- //向�板�句腑娣诲��绾垮�芥��
+ var count = 0;
+ var translateCallback = function (data){
+     if(data.status === 0) {
+         count += data.points.length;
+         var index = 0, count_cp = count;
+         for (var i = 0; i < plPoints.length; i++) {
+             count_cp -= plPoints[i].points.length;
+             if (count_cp <= 0) {
+                 index = i;
+                 break;
+             }
+         }
+         var point_sea = new BMap.PointCollection(data.points,
+             {color:plPoints[index].color, size:plPoints[index].size});
+         map.addOverlay(point_sea);
+     }
+ }
+
+ //å‘åœæ¿›å¥è…‘å¨£è¯²Š ç»¾åž®‡èŠ¥•°
  function addPolyline(){
+     var convertor = new BMap.Convertor();
 	 for(var i=0;i<plPoints.length;i++){
+         // alert(i);
 		 var json = plPoints[i];
-		 points = [];
          var before_trans = [];
 		 for(var j=0;j<json.points.length;j++){
 			 var p1 = json.points[j].split("|")[0];
 			 var p2 = json.points[j].split("|")[1];
              before_trans.push(new BMap.Point(p1,p2));
-             if ((j+1)%10 == 0 || j == json.points.length-1) {
-                 var translateCallback = function (data){
-                     if(data.status === 0) {
-                         points.push(data.points[0]);
-                     }
-                 }
-                 var convertor = new BMap.Convertor();
+             if ((j+1)%10 === 0 || j === json.points.length-1) {
                  convertor.translate(before_trans, 1, 5, translateCallback);
                  before_trans = [];
              }
 		 }
-         setTimeout(function(){
-             var point_sea = new BMap.PointCollection(points, {color:json.color, size:json.size});
-             map.addOverlay(point_sea);
-             alert(map.getOverlays().length);
-         }, 5000);
-     }
+     }      alert("hi");
+
+      var center = new Bmap.Point((plPoints[0].points[0].split("|")[0]+plPoints[0].points[plPoints[0].points.length-1].split("|")[0])/2, (plPoints[0].points[0].split("|")[1]+plPoints[0].points[plPoints[0].points.length-1].split("|")[1])/2);
+ map.setCenter(center);
  }
  
- initMap();//创寤哄��初濮�化�板��
+ initMap();//åˆ›å¯¤å“„’Œåˆæ¿®‹åŒ–åœæ¿›¾
+
 </script>
 </html>

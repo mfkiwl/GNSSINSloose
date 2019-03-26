@@ -21,8 +21,8 @@ MS2KMH = 3.6;       % m/s to km/h
 
 fprintf('开始进行整体数据装载：\n')
 
-load GaosuSuidao0321;
-allData=GaosuSuidao0321;
+load 0321LanXiang;
+allData=LanXiang0321;
 lengthData=length(allData);
 cE=1;
 cP=1;
@@ -97,12 +97,18 @@ PvtData.stdv=[std(PvtData.vel)];
 PvtData.larm=[0,0,0]';
 PvtData.freq=10;
 
-gps=PvtData;
-save PvtData;
+% save PvtData;
+% % 
+InStart=50;
+InEnd=InStart+15;
+PvtData.lon(InStart:InEnd)=0;
+PvtData.lat(InStart:InEnd)=0;
+PvtData.h(InStart:InEnd)=0;
+PvtData.vel(InStart:InEnd,:)=0;
 
-PvtData.lon(50:100)=0;
-PvtData.lat(50:100)=0;
-PvtData.h(50:100)=0;
+gps=PvtData;
+
+
 %% M8U IMU error profile
 
 % IMU data structure:
@@ -136,15 +142,15 @@ InsData.t=(0:0.1:(lengthPVT-3.8))';
 % InsData.t=InsData.t(1:3223);
 
 InsData.arw=[0.008255506,0.013632449,0.010756899];
-InsData.arw          = 2   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
+InsData.arw          = 5   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
 InsData.vrw          = 0.3 .* ones(1,3);     % Velocity random walks [X Y Z] (m/s/root-hour)
-InsData.ab_drift    = 0.3 .* ones(1,3);     % Acc dynamic biases [X Y Z] (mg)
+InsData.ab_drift    = 0.5 .* ones(1,3);     % Acc dynamic biases [X Y Z] (mg)
 InsData.gb_drift   = 0.008 .* ones(1,3);   % Gyro dynamic biases [X Y Z] (deg/s)
-InsData.ab_corr    = 100 .* ones(1,3);     % Acc correlation times [X Y Z] (seconds)
-InsData.gb_corr    = 100 .* ones(1,3);     % Gyro correlation times [X Y Z] (seconds)
-InsData.astd=[0.008212535,0.011965155,0.013044401];
+InsData.ab_corr    = 200 .* ones(1,3);     % Acc correlation times [X Y Z] (seconds)
+InsData.gb_corr    = 200 .* ones(1,3);     % Gyro correlation times [X Y Z] (seconds)
+InsData.astd=[0.008212535,0.011965155,0.113044401];
 InsData.gstd=[0.024667756,0.04169835,0.033167337];
-InsData.ab_fix=[0.316398922,0.170514641,1.284741488];
+InsData.ab_fix=[0.316398922,0.170514641,0.284741488];%改了个位，0->1
 InsData.gb_fix=[0.086656974,0.055781713,0.026144786];
 InsData.apsd=[0.01962,0.01962,0.01962];
 InsData.gpsd=[0.001221730,0.001221730,0.001221730];
@@ -171,7 +177,7 @@ imu1 = imu_err_profile(InsData, dt);      % Transform IMU manufacturer error uni
 
 imu1.ini_align_err = [1 1 5] .* D2R;                     % Initial attitude align errors for matrix P in Kalman filter, [roll pitch yaw] (radians)  
 
-save InsData;
+% save InsData;
 
 
 
@@ -256,7 +262,7 @@ if (strcmp(PLOT,'ON'))
     % VELOCITIES
     figure;
     subplot(311)
-    plot( gps.t, gps.vel(:,1),'-c', imu1_e.t, imu1_e.vel(:,1),'-b');
+    plot( gps.t, gps.vel(:,1),':r', imu1_e.t, imu1_e.vel(:,1),'-k','LineWidth',2);
     xlabel('Time [s]')
     ylabel('[m/s]')
     legend('PVT', 'MMEANS');
@@ -264,7 +270,7 @@ if (strcmp(PLOT,'ON'))
     title('NORTH VELOCITY');
     
     subplot(312)
-    plot( gps.t, gps.vel(:,2),'-c', imu1_e.t, imu1_e.vel(:,2),'-b');
+    plot( gps.t, gps.vel(:,2),':r', imu1_e.t, imu1_e.vel(:,2),'-k','LineWidth',2);
     xlabel('Time [s]')
     ylabel('[m/s]')
     legend('PVT', 'MEANS');
@@ -272,18 +278,17 @@ if (strcmp(PLOT,'ON'))
     title('EAST VELOCITY');
     
     subplot(313)
-    plot(gps.t, gps.vel(:,3),'-c', imu1_e.t, imu1_e.vel(:,3),'-b');
+    plot(gps.t, gps.vel(:,3),':r', imu1_e.t, imu1_e.vel(:,3),'-k','LineWidth',2);
     xlabel('Time [s]')
     ylabel('[m/s]')
     legend('PVT', 'MEANS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('DOWN VELOCITY');
-    
-    
+
     % POSITION
     figure;
     subplot(311)
-    plot( gps.t, gps.lat.*R2D, '-c', imu1_e.t, imu1_e.lat.*R2D, '-b');
+    plot( gps.t, gps.lat.*R2D, ':r', imu1_e.t, imu1_e.lat.*R2D, '-k','LineWidth',2);
     xlabel('Time [s]')
     ylabel('[deg]')
     legend( 'PVT', 'MEANS');
@@ -291,7 +296,7 @@ if (strcmp(PLOT,'ON'))
     title('纬度');
     
     subplot(312)
-    plot( gps.t, gps.lon.*R2D, '-c', imu1_e.t, imu1_e.lon.*R2D, '-b');
+    plot( gps.t, gps.lon.*R2D, ':r', imu1_e.t, imu1_e.lon.*R2D, '-k','LineWidth',2);
     xlabel('Time [s]')
     ylabel('[deg]')
     legend('PVT', 'MEANS');
@@ -299,7 +304,7 @@ if (strcmp(PLOT,'ON'))
     title('经度');
     
     subplot(313)
-    plot( gps.t, gps.h, '-c', imu1_e.t, imu1_e.h, '-b');
+    plot( gps.t, gps.h, ':r', imu1_e.t, imu1_e.h, 'k','LineWidth',2);
     xlabel('Time [s]')
     ylabel('[m]')
     legend('PVT', 'MEANS');
@@ -345,23 +350,32 @@ if (strcmp(PLOT,'ON'))
 end
 
 
-%% Plot map
-%  figure;
-% m_proj('miller','lat',[-77 77]);   
-% m_coast('patch',[.7 1 .7],'edgecolor','none'); 
-% % patch(ax,'xdata',X(:),'ydata',Y(:),'zdata',-MAP_PROJECTION.LARGVAL*ones(size(X(:))),'facecolor',gbackcolor,...
-% 
-% m_grid('box','fancy','linestyle','-','gridcolor','w','backcolor',[.2 .65 1]);
-%     
-% cities={'Cairo','Washington','Buenos Aires'}; 
-% lons=[ 30+2/60  -77-2/60   -58-22/60];
-% lats=[ 31+21/60  38+53/60  -34-45/60]; 
-% for k=1:3
-%     [range,ln,lt]=m_lldist([-123-6/60 lons(k)],[49+13/60  lats(k)],40); 
-%     m_line(ln,lt,'color','r','linewi',2); 
-%     m_text(ln(end),lt(end),sprintf('%s - %d km',cities{k},round(range)));
-% end;
-% title('Great Circle Routes','fontsize',14,'fontweight','bold');
-%     
-% set(gcf,'color','w');   % Need to do this otherwise 'print' turns the lakes black
-%     
+%% 画地图
+GnssRel=[PvtData.lon,PvtData.lat];
+save('GnssRel.mat', 'GnssRel');
+InsRel=[imu1_e.lon*R2D,imu1_e.lat*R2D];
+save ('InsRel.mat', 'InsRel');
+aaa=load('GnssRel.mat')
+save_to_js({'InsRel.mat'},{'red'},[2],[1]);
+
+%% 数据误差分析STD
+STD.gpsLon=std(gps.lon*R2D-mean(gps.lon*R2D));
+STD.gpsLat=std(gps.lat*R2D-mean(gps.lat*R2D));
+STD.gpsh=std(gps.h-mean(gps.h));
+STD.gpsVel=[std(gps.vel(:,1)-mean(gps.vel(:,1))),std(gps.vel(:,2)-mean(gps.vel(:,2))),std(gps.vel(:,2)-mean(gps.vel(:,2)))];
+STD.IGlon=std(imu1_e.lon*R2D-mean(imu1_e.lon*R2D));
+STD.IGlat=std(imu1_e.lat*R2D-mean(imu1_e.lat*R2D));
+STD.IGh=std(imu1_e.h-mean(imu1_e.h));
+STD.IGVel=[std(imu1_e.vel(:,1)-mean(imu1_e.vel(:,1))),std(imu1_e.vel(:,2)-mean(imu1_e.vel(:,2))),std(imu1_e.vel(:,2)-mean(imu1_e.vel(:,2)))];
+% fprintf('STD:',STD);
+
+%% 数据误差分析RMS
+RMS.gpsLon=rms(gps.lon*R2D);
+RMS.gpsLat=rms(gps.lat*R2D);
+RMS.gpsh=rms(gps.h-mean(gps.h));
+RMS.gpsVel=[rms(gps.vel(:,1)),rms(gps.vel(:,2)),rms(gps.vel(:,2))];
+RMS.IGlon=rms(imu1_e.lon*R2D);
+RMS.IGlat=rms(imu1_e.lat*R2D);
+RMS.IGh=rms(imu1_e.h);
+RMS.IGVel=[rms(imu1_e.vel(:,1)),rms(imu1_e.vel(:,2)),rms(imu1_e.vel(:,2))];
+% fprintf('STD:',STD);
