@@ -66,7 +66,7 @@ IMU2_DATA = 'ON';   % Simulate ADIS16488 IMU data
 IMU1_INS  = 'ON';   % Execute INS/GPS integration for ADIS16405 IMU
 IMU2_INS  = 'ON';   % Execute INS/GPS integration for ADIS16488 IMU
 
-PLOT      = 'OFF';   % Plot results.
+PLOT      = 'ON';   % Plot results.
 
 % If a particular parameter is commented above, it is set by default to 'OFF'.
 

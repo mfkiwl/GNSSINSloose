@@ -5,7 +5,7 @@ function [XC]=db5Wavelet(InData)
 % wavetype：小波类型
 % thretype：阈值过滤类型
 % SHOR：‘h’/'s'
-ThreType='heursure';
+ThreType='rigrsure';
 WaveType='db5';
 level=9;
 SORH='s';
@@ -29,8 +29,12 @@ switch ThreType
         th3_rigrsure=thselect(cD3,'rigrsure');
         th4_rigrsure=thselect(cD4,'rigrsure');
         th5_rigrsure=thselect(cD5,'rigrsure');
-        TR_rigrsure=[th1_rigrsure,th2_rigrsure,th3_rigrsure,th4_rigrsure,th5_rigrsure];
-        [XC,CXC,LXC,PERF0,PERF2]=wdencmp('lvd',InData,WaveType',5,TR_rigrsure,SORH);
+        th6_rigrsure=thselect(cD6,'rigrsure');
+        th7_rigrsure=thselect(cD7,'rigrsure');
+        th8_rigrsure=thselect(cD8,'rigrsure');
+        th9_rigrsure=thselect(cD9,'rigrsure');
+        TR_rigrsure=[th1_rigrsure,th2_rigrsure,th3_rigrsure,th4_rigrsure,th5_rigrsure,th6_rigrsure,th7_rigrsure,th8_rigrsure,th9_rigrsure];
+        [XC,CXC,LXC,PERF0,PERF2]=wdencmp('lvd',InData,WaveType,9,TR_rigrsure,SORH);
     case 'heursure'
         %-----------------'heursure'------------------------
         th1_heursur=thselect(cD1,'heursure');

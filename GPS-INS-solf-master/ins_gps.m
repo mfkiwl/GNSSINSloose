@@ -296,7 +296,7 @@ for j = 2:Mg
         ab_fix   = xu(13:15);
         gb_drift = xu(16:18);
         ab_drift = xu(19:21);
-        V_e(i)=distance(lon_e(i)*R2D,lat_e(i)*R2D,lon_e(i-1)*R2D,lat_e(i-1)*R2D)/0.1;
+%         V_e(i)=distance(lon_e(i)*R2D,lat_e(i)*R2D,lon_e(i-1)*R2D,lat_e(i-1)*R2D)/0.1;
        
    
     end
@@ -390,10 +390,10 @@ elseif gps.lon(j)==0
 %         z = [0 0 0 zp']';
 %     end
     
-    % Execute UD filter
-    %         [xu, Up, dp] = ud_filtering(x, z, S.F, S.H, S.G, S.Q, S.R, Up, dp, dtg)ud_filter;
-    %         S.P = Up * diag(dp) * Up';
-    
+%     Execute UD filter
+%             [xu, Up, dp] = ud_filtering(x, z, S.F, S.H, S.G, S.Q, S.R, Up, dp, dtg)ud_filter;
+%             S.P = Up * diag(dp) * Up';
+%     
     %% INS/GPS CORRECTIONS
     
     % Quaternion corrections
