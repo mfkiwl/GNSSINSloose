@@ -1,12 +1,12 @@
-function [XC]=db5Wavelet(InData)
+function [XC]=db5Wavelet(InData,WaveType,SHOR,ThreType)
 
 % InData:输入数据
 % level：分解层数
 % wavetype：小波类型
 % thretype：阈值过滤类型
 % SHOR：‘h’/'s'
-ThreType='rigrsure';
-WaveType='db5';
+% ThreType='rigrsure';
+% WaveType='db5';
 level=9;
 SORH='s';
 [C,L]=wavedec(InData,level,WaveType);

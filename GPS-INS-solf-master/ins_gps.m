@@ -445,7 +445,7 @@ end
 
 % %% Smoothing TESTING
 % 
-% % Initialize RTS Smoother
+% Initialize RTS Smoother
 % ps = diag(Pu_d(Mg,:));
 % xs = zeros (Mg, 21);
 % xs(Mg,:) = X(Mg,:);
@@ -486,7 +486,7 @@ end
 %         lon_e(idx(co)) = lon_e(idx(co)) + xs(co,8);
 %         h_e(idx(co))   = h_e(idx(co))   + xs(co,9);
 %     end
-  
+%   
 
 %% Estimates from INS/GPS integration
 

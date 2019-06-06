@@ -34,7 +34,7 @@ function vel_n = vel_update(fn, vel, omega_ie_N, omega_en_N, g, dt)
 % Author:  Rodrigo Gonzalez <rodralez@frm.utn.edu.ar>
 % URL:     https://github.com/rodralez/navego
 
-S = skewm(vel);             % Skew matrix with velocities
+S = skewm(vel);             % Skew matrix with velocities¶þ½×·´¶Ô³Æ¾ØÕó
  
 coriolis = S * (omega_en_N + 2 * omega_ie_N);   % Coriolis 
 

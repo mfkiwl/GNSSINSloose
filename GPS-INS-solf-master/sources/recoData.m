@@ -20,9 +20,25 @@ MS2KMH = 3.6;       % m/s to km/h
 %% LOAD REFERENCE DATA
 
 fprintf('开始进行整体数据装载：\n')
-
-load 0321LanXiang;
+%蓝天立交
+load 0321lanxiang
 allData=LanXiang0321;
+
+% %另一段高速不能用，时间对齐有问题
+% load('Gaosu0320.mat')
+% allData=Gaosu0320;
+
+% %高速隧道
+% load('GaosuSuidao0321.mat');
+% allData=GaosuSuidao0321;
+% % %低速镇子里
+% load 0321Disu;
+% allData=x0321DisuData;
+%直线走
+% load LineWalk190305;
+% allData=LineWalk190305;
+
+
 lengthData=length(allData);
 cE=1;
 cP=1;
@@ -48,13 +64,13 @@ countzAcc=1;
 for i=1:lengthEsf
 	switch ESF(i,2)
 		case 14
-			AngxData(countxAng,:)=ESF(i,1:3);
+			AngxData(countxAng,:)=ESF(i,1:3)*D2R;
             countxAng=countxAng+1;
 		case 13
-			AngyData(countyAng,:)=ESF(i,1:3);
+			AngyData(countyAng,:)=ESF(i,1:3)*D2R;
             countyAng=countyAng+1;
 		case 5
-			AngzData(countzAng,:)=ESF(i,1:3);
+			AngzData(countzAng,:)=ESF(i,1:3)*D2R;
             countzAng=countzAng+1;
 		case 16
 			AccxData(countxAcc,:)=ESF(i,1:3);
@@ -91,24 +107,28 @@ PvtData.lon =   deg2rad(PVT(:,2)/10000000);
 PvtData.lat =   deg2rad(PVT(:,3)/10000000);
 PvtData.h   =   PVT(:,4)/1000;
 PvtData.vel =   [PVT(:,5),PVT(:,6),PVT(:,7)]/1000;
-PvtData.std   =   [std(PvtData.lon),std(PvtData.lat),std(PvtData.h)];
-PvtData.stdm  =   1.*[1,1,1];
-PvtData.stdv  =   0.1 * KT2MS .* [0.5,0.5,1];%[std(PvtData.vel)];
-PvtData.larm  =   [0,0,0]';
+PvtData.std   =   [0.1,0.2,0.1];
+PvtData.stdm  =   3.*[2,2,1];
+PvtData.stdv  =   0.1 * KT2MS .* [1,1,1]*1.5;
+% PvtData.stdv  = [std(PvtData.vel)];
+PvtData.larm  =   [1,1,1]';
 PvtData.freq  =   1;
 
 % save PvtData;
-% % 
-InStart=50;
+RefPvt=PvtData;
+
+% % % 
+InStart=100;
 InEnd=InStart+15;
 PvtData.lon(InStart:InEnd)=0;
 PvtData.lat(InStart:InEnd)=0;
 PvtData.h(InStart:InEnd)=0;
 PvtData.vel(InStart:InEnd,:)=0;
 
+
 gps=PvtData;
 
-
+OrGps=gps;
 %% M8U IMU error profile
 
 % IMU data structure:
@@ -142,7 +162,7 @@ InsData.t=(0:0.1:(lengthPVT-3.8))';
 % InsData.t=InsData.t(1:3223);
 
 % InsData.arw=[0.008255506,0.013632449,0.010756899];
-InsData.arw          = 5   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
+InsData.arw          = [0.008256,0.013632,0.010757];%2   .* ones(1,3);     % Angle random walks [X Y Z] (deg/root-hour)
 InsData.vrw          = 0.3 .* ones(1,3);     % Velocity random walks [X Y Z] (m/s/root-hour)
 InsData.ab_drift    = 0.5 .* ones(1,3);     % Acc dynamic biases [X Y Z] (mg)
 InsData.gb_drift   = 0.008 .* ones(1,3);   % Gyro dynamic biases [X Y Z] (deg/s)
@@ -150,8 +170,8 @@ InsData.ab_corr    = 200 .* ones(1,3);     % Acc correlation times [X Y Z] (seco
 InsData.gb_corr    = 200 .* ones(1,3);     % Gyro correlation times [X Y Z] (seconds)
 InsData.astd=[0.008212535,0.011965155,0.113044401];
 InsData.gstd=[0.024667756,0.04169835,0.033167337];
-InsData.ab_fix=3.*[0.316398922,0.170514641,0.284741488];%改了个位，0->1
-InsData.gb_fix=3.*[0.086656974,0.055781713,0.026144786];
+InsData.ab_fix=1.*[0.316398922,0.170514641,0.284741488];%改了个位，0->1
+InsData.gb_fix=1.*[0.086656974,0.055781713,0.026144786];
 InsData.apsd=[0.01962,0.01962,0.01962];
 InsData.gpsd=[0.001221730,0.001221730,0.001221730];
 InsData.ini_align=[1 1 1] .* D2R;
@@ -175,7 +195,7 @@ InsData.ini_align_err=[1,1,1]*5;
 dt = mean(diff(InsData.t));                    % IMU mean period
 imu1 = imu_err_profile(InsData, dt);      % Transform IMU manufacturer error units to SI units.
 
-imu1.ini_align_err = [1 1 5] .* D2R;                     % Initial attitude align errors for matrix P in Kalman filter, [roll pitch yaw] (radians)  
+% imu1.ini_align_err = [1 1 10] .* D2R;                     % Initial attitude align errors for matrix P in Kalman filter, [roll pitch yaw] (radians)  
 
 % save InsData;
 
@@ -192,18 +212,23 @@ imu1.ini_align_err = [1 1 5] .* D2R;                     % Initial attitude alig
 % SHOR：‘h’/'s'
 fprintf('开始进行小波滤波处理：\n')
 
-OutFb1=db5Wavelet(imu1.fb(:,1));
-OutFb2=db5Wavelet(imu1.fb(:,2));
-OutFb3=db5Wavelet(imu1.fb(:,3));
-OutWb1=db5Wavelet(imu1.wb(:,1));
-OutWb2=db5Wavelet(imu1.wb(:,2));
-OutWb3=db5Wavelet(imu1.wb(:,3));
-
+OutFb1=db5Wavelet(imu1.fb(:,1),'bior3.3','s','rigrsure');
+OutFb2=db5Wavelet(imu1.fb(:,2),'bior3.3','s','rigrsure');
+OutFb3=db5Wavelet(imu1.fb(:,3),'bior3.3','s','rigrsure');
+OutWb1=db5Wavelet(imu1.wb(:,1),'db5','s','rigrsure');
+OutWb2=db5Wavelet(imu1.wb(:,2),'db5','s','rigrsure');
+OutWb3=db5Wavelet(imu1.wb(:,3),'db5','s','rigrsure');
+% 
 imu1.fb=[OutFb1,OutFb2,OutFb3];
 imu1.fb=imu1.fb(1:2759,:);
 imu1.wb=[OutWb1,OutWb2,OutWb3];
 
-
+% gps.lon=db5Wavelet(gps.lon,'bior3.3');
+% gps.lat=db5Wavelet(gps.lat,'bior3.3');
+% gps.h=db5Wavelet(gps.h,'bior3.3');
+% gps.vel(:,1)=db5Wavelet(gps.vel(:,1),'bior3.3');
+% gps.vel(:,2)=db5Wavelet(gps.vel(:,2),'bior3.3');
+% gps.vel(:,3)=db5Wavelet(gps.vel(:,3),'bior3.3');
 %% INS/GPS integration using 
 fprintf('开始进行组合导航解算\n')
  % Sincronize GPS data with IMU data.
@@ -232,7 +257,7 @@ fprintf('开始进行组合导航解算\n')
     
     % Execute INS/GPS integration
     % ---------------------------------------------------------------------
-   [imu1_e] = ins_gps(imu1, PvtData, 'quaternion','double');
+   [imu1_e] = ins_gps(imu1, gps, 'quaternion','double');
     % ---------------------------------------------------------------------
 save imu1_e.mat imu1_e
 % OUTPUT:
@@ -267,52 +292,58 @@ if (strcmp(PLOT,'ON'))
     % VELOCITIES
     figure;
     subplot(311)
-    plot( gps.t, gps.vel(:,1),':r', imu1_e.t, smooth(imu1_e.vel(:,1)),'-k','LineWidth',2);
+    plot( OrGps.t, OrGps.vel(:,1),'-y','LineWidth',4);hold on;
+    plot( imu1_e.t, smooth(imu1_e.vel(:,1)),':r','LineWidth',4);
     xlabel('Time [s]')
     ylabel('[m/s]')
-    legend('PVT', 'MMEANS');
+    legend('PVT', 'PVT/MEAS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('NORTH VELOCITY');
     
     subplot(312)
-    plot( gps.t, gps.vel(:,2),':r', imu1_e.t, imu1_e.vel(:,2),'-k','LineWidth',2);
+    plot( OrGps.t, OrGps.vel(:,2),'-y','LineWidth',4);hold on;
+    plot(imu1_e.t, imu1_e.vel(:,2),':r','LineWidth',4);
     xlabel('Time [s]')
     ylabel('[m/s]')
-    legend('PVT', 'MEANS');
+    legend('PVT', 'PVT/MEAS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('EAST VELOCITY');
     
     subplot(313)
-    plot(gps.t, gps.vel(:,3),':r', imu1_e.t, imu1_e.vel(:,3),'-k','LineWidth',2);
+    plot(OrGps.t, OrGps.vel(:,3),'-y','LineWidth',4);hold on;
+    plot(imu1_e.t, imu1_e.vel(:,3),':r','LineWidth',4);
     xlabel('Time [s]')
     ylabel('[m/s]')
-    legend('PVT', 'MEANS');
+    legend('PVT', 'PVT/MEAS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('DOWN VELOCITY');
 
     % POSITION
     figure;
     subplot(311)
-    plot( gps.t, gps.lat.*R2D, ':r', imu1_e.t, imu1_e.lat.*R2D, '-k','LineWidth',2);
+    plot( OrGps.t, OrGps.lat.*R2D, '-y','LineWidth',4);hold on;
+    plot( imu1_e.t, imu1_e.lat.*R2D, ':r','LineWidth',4);
     xlabel('Time [s]')
     ylabel('[deg]')
-    legend( 'PVT', 'MEANS');
+    legend( 'PVT', 'PVT/MEAS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('纬度');
     
     subplot(312)
-    plot( gps.t, gps.lon.*R2D, ':r', imu1_e.t, imu1_e.lon.*R2D, '-k','LineWidth',2);
+    plot( OrGps.t,OrGps.lon.*R2D, '-y','LineWidth',4);hold on;
+    plot(imu1_e.t, imu1_e.lon.*R2D, ':r','LineWidth',4);
     xlabel('Time [s]')
     ylabel('[deg]')
-    legend('PVT', 'MEANS');
+    legend('PVT', 'PVT/MEAS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('经度');
     
     subplot(313)
-    plot( gps.t, gps.h, ':r', imu1_e.t, imu1_e.h, 'k','LineWidth',2);
+    plot( OrGps.t,OrGps.h, '-y', 'LineWidth',4);hold on;
+    plot(imu1_e.t, imu1_e.h, ':r','LineWidth',4);
     xlabel('Time [s]')
     ylabel('[m]')
-    legend('PVT', 'MEANS');
+    legend('PVT', 'PVT/MEAS');
     set(gca, 'Fontname', '华文中宋','FontSize',14);
     title('高度');
     
@@ -329,23 +360,23 @@ if (strcmp(PLOT,'ON'))
     lon2m_g = (RE + gps.h).*cos(gps.lat);
     
     figure;
-   plot3(gps.lon.*R2D, gps.lat.*R2D,gps.h);
+   plot3(OrGps.lon.*R2D, OrGps.lat.*R2D,OrGps.h,'-y','LineWidth',4);
    xlabel('经度');
    ylabel('纬度');
    zlabel('高度');
    title('3维轨迹图');
    set(gca, 'Fontname', '华文中宋','FontSize',14);
-   grid on;hold on;
+   grid on;
    hold on;
-   plot3(imu1_e.lon.*R2D, imu1_e.lat.*R2D,imu1_e.h);
-   legend('PVT','PVT/INS');
+   plot3(imu1_e.lon.*R2D, imu1_e.lat.*R2D,imu1_e.h,':r','LineWidth',4);
+   legend('PVT','PVT/MEAS');
    
    figure;
-   plot(gps.lon.*R2D, gps.lat.*R2D);
+   plot(OrGps.lon.*R2D, OrGps.lat.*R2D,'-y','LineWidth',4);
    hold on;grid on;
-   plot(imu1_e.lon.*R2D, imu1_e.lat.*R2D);
+   plot(imu1_e.lon.*R2D, imu1_e.lat.*R2D,':r','LineWidth',4);
    set(gca, 'Fontname', '华文中宋','FontSize',14);
-   legend('PVT','PVT/INS');
+   legend('PVT','PVT/MEAS');
    title('2维轨迹对比图');
    
    figure;
@@ -366,14 +397,14 @@ save_to_js({'InsRel.mat'},{'red'},[2],[1]);
 %% 数据误差分析STD
 slNum=80;
 R2D=1;
-STD.gpsLon=std(gps.lon*R2D-mean(gps.lon*R2D));
-STD.gpsLat=std(gps.lat*R2D-mean(gps.lat*R2D));
-STD.gpsh=std(gps.h-mean(gps.h));
-STD.gpsVel=[std(gps.vel(:,1)-mean(gps.vel(:,1))),std(gps.vel(:,2)-mean(gps.vel(:,2))),std(gps.vel(:,2)-mean(gps.vel(:,2)))];
-STD.IGlon=std(imu1_e.lon(slNum:length(imu1_e.lon))*R2D-mean(imu1_e.lon(slNum:length(imu1_e.lon))*R2D));
-STD.IGlat=std(imu1_e.lat(slNum:length(imu1_e.lat))*R2D-mean(imu1_e.lat(slNum:length(imu1_e.lat))*R2D));
-STD.IGh=std(imu1_e.h(slNum:length(imu1_e.h))-mean(imu1_e.h(slNum:length(imu1_e.h))));
-STD.IGVel=[std(imu1_e.vel(slNum:length(imu1_e.vel),1)-mean(imu1_e.vel(slNum:length(imu1_e.vel),1))),std(imu1_e.vel(slNum:length(imu1_e.vel),2)-mean(imu1_e.vel(slNum:length(imu1_e.vel),2))),std(imu1_e.vel(slNum:length(imu1_e.vel),3)-mean(imu1_e.vel(slNum:length(imu1_e.vel),3)))];
+STD.gpsLon=std(OrGps.lon);
+STD.gpsLat=std(OrGps.lat);
+STD.gpsh=std(OrGps.h);
+STD.gpsVel=[std(OrGps.vel(:,1)),std(OrGps.vel(:,2)),std(OrGps.vel(:,2))];
+STD.IGlon=std(imu1_e.lon(slNum:length(imu1_e.lon)));
+STD.IGlat=std(imu1_e.lat(slNum:length(imu1_e.lat)));
+STD.IGh=std(imu1_e.h(slNum:length(imu1_e.h)));
+STD.IGVel=[std(imu1_e.vel(slNum:length(imu1_e.vel),1)),std(imu1_e.vel(slNum:length(imu1_e.vel),2)),std(imu1_e.vel(slNum:length(imu1_e.vel),3))];
 % Print STD &RMS
 fprintf('开始打印GNSS/INS STD：\n');
 Exl_STD_GPS_LLH=[STD.gpsLon,STD.gpsLat,STD.gpsh];
@@ -386,12 +417,12 @@ Exl_STD_Vel=[Exl_STD_GPS_Vel;Exl_STD_IG_Vel];
 xlswrite('GNSS_INS_STD.xlsx',Exl_STD_LLH,'Sheet1','B2');  
 xlswrite('GNSS_INS_STD.xlsx',Exl_STD_Vel,'Sheet2','B2'); 
 %% 数据误差分析RMS
-RMS.gpsLon=rms(gps.lon*R2D-mean(gps.lon*R2D));
-RMS.gpsLat=rms(gps.lat*R2D-mean(gps.lat*R2D));
-RMS.gpsh=rms(gps.h-mean(gps.h));
-RMS.gpsVel=[rms(gps.vel(:,1)-mean(gps.vel(:,1))),rms(gps.vel(:,2)-mean(gps.vel(:,2))),rms(gps.vel(:,2)-mean(gps.vel(:,2)))];
-RMS.IGlon=rms(imu1_e.lon(slNum:length(imu1_e.lon))*R2D-mean(imu1_e.lon(slNum:length(imu1_e.lon))*R2D));
-RMS.IGlat=rms(imu1_e.lat(slNum:length(imu1_e.lat))*R2D-mean(imu1_e.lat(slNum:length(imu1_e.lat))*R2D));
+RMS.gpsLon=rms(OrGps.lon-mean(OrGps.lon));
+RMS.gpsLat=rms(OrGps.lat-mean(OrGps.lat));
+RMS.gpsh=rms(OrGps.h-mean(gps.h));
+RMS.gpsVel=[rms(OrGps.vel(:,1)-mean(OrGps.vel(:,1))),rms(OrGps.vel(:,2)-mean(OrGps.vel(:,2))),rms(OrGps.vel(:,2)-mean(OrGps.vel(:,2)))];
+RMS.IGlon=rms(imu1_e.lon(slNum:length(imu1_e.lon))-mean(imu1_e.lon(slNum:length(imu1_e.lon))));
+RMS.IGlat=rms(imu1_e.lat(slNum:length(imu1_e.lat))-mean(imu1_e.lat(slNum:length(imu1_e.lat))));
 RMS.IGh=rms(imu1_e.h(slNum:length(imu1_e.h))-mean(imu1_e.h(slNum:length(imu1_e.h))));
 RMS.IGVel=[rms(imu1_e.vel(slNum:length(imu1_e.vel),1)-mean(imu1_e.vel(slNum:length(imu1_e.vel),1))),rms(imu1_e.vel(slNum:length(imu1_e.vel),2)-mean(imu1_e.vel(slNum:length(imu1_e.vel),2))),rms(imu1_e.vel(slNum:length(imu1_e.vel),3)-mean(imu1_e.vel(slNum:length(imu1_e.vel),3)))];
 % fprintf('STD:',STD);
@@ -427,11 +458,113 @@ ExlImu_aPSD=[InsData.apsd(1),imu1.apsd(1),InsData.apsd(2),imu1.apsd(2),InsData.a
 ExlImu_ini_align=[InsData.ini_align(1),imu1.ini_align(1),InsData.ini_align(2),imu1.ini_align(2),InsData.ini_align(3),imu1.ini_align(3)];
 ExlImu_ini_align_err=[InsData.ini_align_err(1),imu1.ini_align_err(1),InsData.ini_align_err(2),imu1.ini_align_err(2),InsData.ini_align_err(3),imu1.ini_align_err(3)];
 EXL_Imu=[ExlImu_arw;ExlImu_vrw;ExlImu_gstd;ExlImu_astd;ExlImu_gFix;ExlImu_aFix;ExlImu_gDrift;ExlImu_aDrift;ExlImu_gCorr;ExlImu_aCorr;ExlImu_gPSD;ExlImu_aPSD;ExlImu_ini_align;ExlImu_ini_align_err];
-xlswrite('imuErr.xlsx',EXL_Imu,'Sheet1','B3');  
+% xlswrite('imuErr.xlsx',EXL_Imu,'Sheet1','B3');  
 fprintf('IMU误差已经写好。\n');
- 
- 
 
- 
- 
- 
+Org=imu1_e;
+
+%% 结果比较
+
+fprintf('与PVT结果比较');
+Tt=0:0.1:length(RefPvt.lon)-14.1;
+TT=0:1:length(RefPvt.lon);
+%卫星定位结果比较
+Lng=RefPvt.lon;
+Lat=RefPvt.lat;
+Time=(1:length(Lng)).';
+
+LngRes=(Org.lon(1:10:length(Org.lon))-Lng(1:276)).*3600*25*R2D;
+%未丢失情况下的RMS计算
+LngMean=mean(LngRes)
+LngRMS=rms(LngRes)
+
+
+%纬度
+LatRes=(Org.lat(1:10:length(Org.lon))-Lat(1:276))*3600*30*R2D;
+%未丢失情况下的RMS计算源
+LatMean=mean(LatRes)
+LatRMS=rms(LatRes)
+TwoDRMS=sqrt(LatRMS^2+LngRMS^2)
+
+fprintf('与PVT结果比较局部RMS');
+LatRMSPart=rms(LatRes(InStart:InEnd+20))
+LngRMSPart=rms(LngRes(InStart:InEnd+20))
+
+TwoDRMS=sqrt(LatRMSPart^2+LngRMSPart^2)
+
+
+figure;
+plot(LngRes,'-r','linewidth',2);
+set(gca, 'Fontname', '华文中宋','FontSize',20);grid on;
+title('组合导航与PVT经度残差');
+xlabel('时间历元（s）');
+ylabel('组合定位经度残差（m）');
+
+figure;
+plot(LatRes,'-r','linewidth',2);
+set(gca, 'Fontname', '华文中宋','FontSize',20);grid on;
+title('组合导航与PVT纬度残差');
+xlabel('时间历元（s）');
+ylabel('组合定位纬度残差（m）');
+
+
+fprintf('与拟合结果比较');
+%与组合导航结果拟合结果比较
+%组合导航结果田王立交
+a=load('RefInsPvt.mat')
+% % 高速另一段
+% a=load('Gaosu0320.mat')
+
+%高速隧道
+% a=load('GaosuSuidao0321.mat')
+
+% 低速镇子里
+% a=load('0321Disu.mat');
+% %正确解算结果
+Lng=imu1_e.lon;
+Lat=imu1_e.lat;
+Time=(1:length(Lng)).';
+
+%经度
+lngfitcoeff = polyfit(Time,Lng,15);
+lngfitCurve = polyval(lngfitcoeff,Time);    %latfitcoeff(5)*latTime.^4+latfitcoeff(4)*latTime.^3+latfitcoeff(3)*latTime.^2+latfitcoeff(2)*latTime+latfitcoeff(1);
+LngRes=(imu1_e.lon-lngfitCurve).*3600*25*180/pi;
+LngMean=mean(LngRes)
+LngRMS=rms(LngRes)
+LngSTD=std(LngRes)
+
+%纬度
+latfitcoeff = polyfit(Time,Lat,15);
+latfitCurve = polyval(latfitcoeff,Time);    %latfitcoeff(5)*latTime.^4+latfitcoeff(4)*latTime.^3+latfitcoeff(3)*latTime.^2+latfitcoeff(2)*latTime+latfitcoeff(1);
+LatRes=(imu1_e.lat-latfitCurve)*3600*30*180/pi;
+LatMean=mean(LatRes)
+LatRMS=rms(LatRes)
+LatSTD=std(LatRes)
+TwoDRMS=sqrt(LatRMS^2+LngRMS^2)
+
+fprintf('拟合结果局部RMS');
+LatRMSPart=rms(LatRes(InStart:InEnd+20))
+LngRMSPart=rms(LngRes(InStart:InEnd+20))
+
+TwoDRMS=sqrt(LatRMSPart^2+LngRMSPart^2)
+
+figure;
+plot(Tt,LngRes(1:2700),'-r','linewidth',2);
+set(gca, 'Fontname', '华文中宋','FontSize',20);grid on;
+title('组合导航拟合轨迹经度残差');
+xlabel('时间历元（s）');
+ylabel('组合定位经度残差（m）');
+
+figure;
+plot(Tt,LatRes(1:2700),'-r','linewidth',2);
+set(gca, 'Fontname', '华文中宋','FontSize',20);grid on;
+title('组合导航拟合轨迹纬度残差');
+xlabel('时间历元（s）');
+ylabel('组合定位纬度残差（m）');
+
+figure;
+plot(lngfitCurve*180/pi,latfitCurve*180/pi);
+set(gca, 'Fontname', '华文中宋','FontSize',20);grid on;
+title('组合导航拟合轨迹');
+xlabel('经度（deg）');
+ylabel('纬度');

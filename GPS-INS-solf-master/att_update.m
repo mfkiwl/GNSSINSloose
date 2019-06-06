@@ -55,7 +55,7 @@ if strcmp(att_mode, 'quaternion')
 %% Quaternion update   
 
     qua_n   = qua_update(qua, w_bn, dt);    % Update quaternions
-    qua_n   = qua_n / norm(qua_n);          % Brute-force normalization
+    qua_n   = qua_n / norm(qua_n);          % Brute-force normalization±ê×¢¹éÒ»»¯
     DCMbn_n = qua2dcm(qua_n);               % Update DCM
     euler   = qua2euler(qua_n);             % Update Euler angles
     
